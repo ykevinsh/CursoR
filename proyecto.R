@@ -25,7 +25,8 @@ summary(tabla$Ratio_Activos_Est)
 View(tabla$est)
 
 
-
+install.packages("plotly")
+library(plotly)
 
 
 
@@ -74,7 +75,10 @@ rownames(a2)<-c(tabla$est)
 # head(data)
 
 # The default radar chart 
-radarchart(data)
+v1<-radarchart(data)
+
+fig <-plot_ly(oo)
+fig  
 
 radarchart( data  , axistype=1 , 
             
@@ -119,8 +123,8 @@ radarchart( dataq  , axistype=1 ,
 library(dbplyr)
 library(TSA)
 library(ggplot2)
-
-
+install.packages("plotly")
+library(plotly)
 install.packages("forecats")
 library(forcats)
 install.packages("hrbrthemes")  
@@ -133,7 +137,7 @@ y1 <- w[order(w$tabla.Total_Muertes),]
 y2<-data.frame(y1)
 colnames(y2) <- c("Estado","No.defunciones")
 
-y1 %>%
+yy1<-y1 %>%
   arrange(tabla.Total_Muertes) %>%    # First sort by val. This sort the dataframe but NOT the factor levels
   mutate(tabla.est=factor(tabla.est, levels=tabla.est)) %>%   # This trick update the factor levels
   ggplot( aes(x=tabla.est, y=tabla.Total_Muertes)) +
@@ -145,6 +149,7 @@ y1 %>%
   ylab("No. Fallecimientos")+
   labs(title = paste("Estados con mayor número de Defunciones"))
   
+yy1
 
 library(treemap)
 group <- c(tabla$Region)
@@ -215,6 +220,9 @@ mm<-tabla$No_Estado+400
 datac<-data.frame(country,continent,lifeExp,pop,Letalidad,mm)
 
 
+pop<-as.data.frame(pop)
+pop<-mutate(pop)
+
 datac %>%
   mutate(country = factor(country, country)) %>%
   ggplot(aes(x=Letalidad, y=lifeExp, size=pop, color=country )) +
@@ -231,8 +239,19 @@ datac %>%
   ylab("Porcentaje de Contagiarte") +
   xlab("Porcentaje de Letalidad")
 
+  mutate(text = paste("Estado: ", country, "\nMuertes: ", pop, "\nRatio per capita: ", lifeExp, "\nLetalidad: ", Letalidad, sep="")) %>%
+    mutate(pop)
+  library(ggplot2)
+  library(dplyr)
+  library(plotly)
+  library(viridis)
+  library(hrbrthemes)
+   
 YY<-datac %>%
   mutate(country = factor(country, country)) %>%
+  mutate(pop)%>%
+  mutate(lifeExp)%>%
+  mutate(text = paste("Estado: ", country, "\nMuertes: ", pop, "\nRatio per capita: ", lifeExp, "\nLetalidad: ", Letalidad, sep="")) %>%
   ggplot(aes(x=Letalidad, y=lifeExp, size=pop, color=country )) +
   geom_point(alpha=0.4) +
   geom_text(
@@ -243,10 +262,10 @@ YY<-datac %>%
     size = 4
   )+
   scale_size(range = c(1, 30), name="Defunsiones")+
+  theme(legend.position="none")
   ylab("Porcentaje de Contagiarte") +
   xlab("Porcentaje de Letalidad")
 YY
 
-Y <- YY + 
-  scale_color_manual(values = c(tabla$No_Estado))
+Y <- ggplotly(YY, tooltip="text")
 Y
